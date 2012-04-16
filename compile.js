@@ -5,10 +5,19 @@
     return Math.max(endTime(time, expr.left), endTime(time, expr.right));
 };
 
+var letterPitch = {'C' : 0, 'D' : 2, 'E' : 4, 'F' : 5, 'G' : 7, 'A' : 9, 'B' : 11}
+
+var toMidi = function (pitch) {
+    var letter = pitch.substring(0, 1).toUpperCase();
+    var octave = parseInt(pitch.substring(1));
+//    console.log('letter: ' + letter + 'octave: ' + octave);
+    return 12 + 12 * octave + letterPitch[letter];
+};
+
 var compileT = function (musexpr, time) {
     if (musexpr.tag === 'note') {
         return [{ tag: 'note',
-            pitch: musexpr.pitch,
+            pitch: toMidi(musexpr.pitch),
             start: time,
             dur: musexpr.dur
         }];
