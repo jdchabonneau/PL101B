@@ -1,5 +1,5 @@
 ﻿var endTime = function (time, expr) {
-    if (expr.tag === 'note') return time + expr.dur;
+    if (expr.tag === 'note' || expr.tag === 'rest') return time + expr.dur;
     if (expr.tag === 'seq')
         return endTime(endTime(time, expr.left), expr.right);
     return Math.max(endTime(time, expr.left), endTime(time, expr.right));
@@ -12,6 +12,9 @@ var compileT = function (musexpr, time) {
             start: time,
             dur: musexpr.dur
         }];
+    }
+    if (musexpr.tag === 'rest') {
+        return [];
     }
     if (musexpr.tag === 'seq') {
         var left = compileT(musexpr.left, time);
@@ -37,14 +40,25 @@ var melody_mus =
         left:
        { tag: 'par',
            left: { tag: 'note', pitch: 'c3', dur: 250 },
-           right: { tag: 'note', pitch: 'g4', dur: 500}
+           right: { tag: 'note', pitch: 'g4', dur: 500 }
        },
         right:
        { tag: 'par',
            left: { tag: 'note', pitch: 'd3', dur: 500 },
-           right: { tag: 'note', pitch: 'f4', dur: 250}
+           right: { tag: 'note', pitch: 'f4', dur: 250 }
        }
     };
 
-console.log(melody_mus);
-console.log(compile(melody_mus));
+    var melody_mus2 =
+{ tag: "par",
+    left: { tag: "par",
+        left: { tag: "note", pitch: 'c1', dur: 400 },
+        right: { tag: 'seq', left: { tag: 'rest', dur: 100 }, right: { tag: "note", pitch: 'c2', dur: 300} }
+    },
+    right: { tag: "par",
+        left: { tag: 'seq', left: { tag: 'rest', dur: 200 }, right: { tag: "note", pitch: 'c3', dur: 200} },
+        right: { tag: 'seq', left: { tag: 'rest', dur: 300 }, right: { tag: "note", pitch: 'c4', dur: 100} }
+    }
+};
+console.log(melody_mus2);
+console.log(compile(melody_mus2));
