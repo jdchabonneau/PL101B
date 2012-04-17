@@ -1,5 +1,8 @@
 ﻿var endTime = function (time, expr) {
     if (expr.tag === 'note' || expr.tag === 'rest') return time + expr.dur;
+    if (expr.tag === 'repeat') {
+        return time + endTime(0, expr.section) * expr.count;
+    }
     if (expr.tag === 'seq')
         return endTime(endTime(time, expr.left), expr.right);
     return Math.max(endTime(time, expr.left), endTime(time, expr.right));
@@ -15,12 +18,22 @@ var toMidi = function (pitch) {
 };
 
 var compileT = function (musexpr, time) {
+    var ret = [];
+    var dur;
     if (musexpr.tag === 'note') {
         return [{ tag: 'note',
             pitch: toMidi(musexpr.pitch),
             start: time,
             dur: musexpr.dur
         }];
+    }
+    if (musexpr.tag === 'repeat') {
+        dur = endTime(0, musexpr.section);
+        for (i = 0; i < musexpr.count; i++) {
+            var ret2 = (compileT(musexpr.section, time + i * dur));
+            ret = ret.concat(ret2);
+        }
+        return ret;
     }
     if (musexpr.tag === 'rest') {
         return [];
@@ -69,5 +82,10 @@ var melody_mus =
         right: { tag: 'seq', left: { tag: 'rest', dur: 300 }, right: { tag: "note", pitch: 'c4', dur: 100} }
     }
 };
-console.log(melody_mus2);
-console.log(compile(melody_mus2));
+
+var r = { tag: 'repeat', count: 3, section:
+
+melody_mus2
+};
+console.log(r);
+console.log(compile(r));
